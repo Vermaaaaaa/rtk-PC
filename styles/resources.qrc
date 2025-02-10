@@ -1,0 +1,11 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="MaterialDark.qss">MaterialDark.qss</file>
+        <file alias="ManjaroMix.qss">ManjaroMix.qss</file>
+        <file alias="Ubuntu.qss">Ubuntu.qss</file>
+        <file alias="AMOLED.qss">AMOLED.qss</file>
+        <file alias="Aqua.qss">Aqua.qss</file>
+        <file alias="ConsoleStyle.qss">ConsoleStyle.qss</file>
+        <file alias="ElegantDark.qss">ElegantDark.qss</file>
+    </qresource>
+</RCC>

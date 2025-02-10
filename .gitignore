@@ -1,0 +1,63 @@
+# Ignore build directories
+build*/
+Build*/
+
+# Ignore Qt-specific files
+*.pro.user
+*.pro.user.*
+*.qmake.stash
+*.qmake.cache
+*.moc
+*.rcc
+*.o
+*.obj
+*.a
+*.lib
+*.la
+*.lo
+*.prl
+*.lai
+*.pc
+Makefile
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+ui_*.h
+moc_*.cpp
+qrc_*.cpp
+
+# Ignore generated settings
+*.qmlc
+*.qtd
+*.qhc
+*.qch
+
+# Ignore executable binaries
+*.exe
+*.dll
+*.so
+*.dylib
+*.app
+*.out
+
+# Ignore QtCreator-specific files
+*.autosave
+*.swp
+*.swo
+*.bak
+*.tmp
+
+# Ignore log and debugging files
+*.log
+*.dmp
+*.stackdump
+*.crash
+
+# Ignore user-specific configuration
+*.DS_Store
+*.vscode/
+*.idea/
+*.settings/
+*.clangd/
+*.cache/
+*.ccls-cache/
