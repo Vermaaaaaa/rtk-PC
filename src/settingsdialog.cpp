@@ -65,33 +65,11 @@ void SettingsDialog::setCurrentRow(int row){
 void SettingsDialog::applyChanges(RendererSettingsPage *rendererSettingsPage, ThemeSettingsPage *themeSettingsPage){
     themes_t theme = themeSettingsPage->get_selectedTheme();
     settings->guiSettings().setTheme(theme);
+    static_cast<MainWindow*>(parent())->applyStyleSheet(theme);
 
-    QString themePath;
-    switch (theme) {
-    case MATERIAL_DARK:
-        themePath = ":/MaterialDark.qss";
-        break;
-    case MANJARO_MIX:
-        themePath = ":/ManjaroMix.qss";
-        break;
-    case AMOLED:
-        themePath = ":/AMOLED.qss";
-        break;
-    case AQUA:
-        themePath = ":/Aqua.qss";
-        break;
-    case CONSOLE_STYLE:
-        themePath = ":/ConsoleStyle.qss";
-        break;
-    case ELEGANT_DARK:
-        themePath = ":/ElegantDark.qss";
-        break;
-    case UBUNTU:
-        themePath = ":/Ubuntu.qss";
-        break;
-    }
+    bool isSepWin = rendererSettingsPage->getRendererCheckBox()->isChecked();
+    settings->rendererSettings().setIsSeparateWindow(isSepWin);
 
-    static_cast<MainWindow*>(parent())->applyStyleSheet(themePath);
 
 }
 

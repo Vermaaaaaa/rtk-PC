@@ -11,6 +11,9 @@
 #include "settingsdialog.h"
 #include <QSplitter>
 #include "settingsmanager.h"
+#include "guisettings.h"
+#include <QThread>
+#include "USBTest.h"
 
 
 
@@ -19,19 +22,25 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 
 public:
-    MainWindow(QWidget *parent = nullptr);
+    explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-    void applyStyleSheet(const QString &styleSheetPath);
+    void applyStyleSheet(const themes_t theme);
     void logMessage(const QString &message);
 
 private:
+    void setupUSB();
+
     SettingsDialog *settingsDialog;
     QPlainTextEdit *debugConsole;
     QSplitter *splitter;
     SettingsManager *settings;
+    QThread *usbThread;
+    USBReader *usbReader;
 
-private:
+
+
+protected:
     void closeEvent(QCloseEvent *event) override;
 
 
@@ -40,5 +49,8 @@ private slots:
     void OpenSessionManagementSettings();
     void OpenRendererSettings();
     void OpenThemeSettings();
+    void handleUSBData(quint32 data);
+    void closeUSBData();
+    void pauseUSBData();
 };
 #endif // MAINWINDOW_H

@@ -9,7 +9,7 @@
 #include <QSplitter>
 #include <QTabWidget>
 
-#include <QTabWidget>
+#include <QPushButton>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     // 1. Initialize Settings
     settings = new SettingsManager();
 
+    applyStyleSheet(settings->guiSettings().getTheme());
 
 
     // 2. Create Menu Bar
@@ -45,7 +46,24 @@ MainWindow::MainWindow(QWidget *parent)
     QSplitter *splitter = new QSplitter(Qt::Vertical, this);
 
     // 6. Create 3D Renderer Widget
-    QPlainTextEdit *temp = new QPlainTextEdit(this);
+    //QPlainTextEdit *temp = new QPlainTextEdit(this);
+
+    QWidget *box = new QWidget(this);
+
+    QVBoxLayout *tempLayout = new QVBoxLayout(this);
+
+    QPushButton *temp = new QPushButton("CLOSE",this);
+    QPushButton *temp2 = new QPushButton("PAUSE",this);
+
+    connect(temp, &QPushButton::clicked, this, &MainWindow::closeUSBData);
+    connect(temp2, &QPushButton::clicked, this, &MainWindow::pauseUSBData);
+
+    tempLayout->addWidget(temp);
+    tempLayout->addWidget(temp2);
+
+    box->setLayout(tempLayout);
+
+
 
     // 7. Create Tab Widget for Debug Console
     QTabWidget *tabWidget = new QTabWidget(this);
@@ -57,7 +75,7 @@ MainWindow::MainWindow(QWidget *parent)
     tabWidget->addTab(debugConsole, "Debug Console");
 
     // 9. Add Widgets to Splitter
-    splitter->addWidget(temp);
+    splitter->addWidget(box);
     splitter->addWidget(tabWidget);
     splitter->setStretchFactor(0, 2);
     splitter->setStretchFactor(1, 1);
@@ -68,7 +86,9 @@ MainWindow::MainWindow(QWidget *parent)
     centralWidget->setLayout(mainLayout);
 
     // 11. Log Initial Message
-    logMessage("Hello World");
+    logMessage("USB Data Emulation Started");
+
+    setupUSB();
 
     // 12. Show Maximized Last
     showMaximized();
@@ -91,14 +111,38 @@ void MainWindow::OpenThemeSettings(){
     settingsDialog->show();
 }
 
-void MainWindow::applyStyleSheet(const QString &styleSheetPath) {
-    QFile file(styleSheetPath);
+void MainWindow::applyStyleSheet(const themes_t theme) {
+    QString themePath;
+    switch (theme) {
+    case MATERIAL_DARK:
+        themePath = ":/MaterialDark.qss";
+        break;
+    case MANJARO_MIX:
+        themePath = ":/ManjaroMix.qss";
+        break;
+    case AMOLED:
+        themePath = ":/AMOLED.qss";
+        break;
+    case AQUA:
+        themePath = ":/Aqua.qss";
+        break;
+    case CONSOLE_STYLE:
+        themePath = ":/ConsoleStyle.qss";
+        break;
+    case ELEGANT_DARK:
+        themePath = ":/ElegantDark.qss";
+        break;
+    case UBUNTU:
+        themePath = ":/Ubuntu.qss";
+        break;
+    }
+    QFile file(themePath);
     if (file.open(QFile::ReadOnly)) {
         QString styleSheet = QLatin1String(file.readAll());
         qApp->setStyleSheet(styleSheet);
         file.close();
     } else {
-        qDebug() << "Failed to load QSS file:" << styleSheetPath;
+        qDebug() << "Failed to load QSS file:" << themePath;
     }
 }
 
@@ -110,9 +154,71 @@ void MainWindow::logMessage(const QString &message){
 MainWindow::~MainWindow()
 {
     delete settings;
+
+    if (usbReader) {
+        usbReader->stopReading();  // Ensure it stops before deletion
+        usbThread->quit();
+        usbThread->wait();
+    }
+
+    delete usbReader;
+    delete usbThread;  // Clean up the thread after stopping
 }
 
 void MainWindow::closeEvent(QCloseEvent *event) {
     settings->saveSettings(); // Save settings before exit
     QMainWindow::closeEvent(event);
 }
+
+
+void MainWindow::setupUSB(){
+    usbThread = new QThread(this);
+    usbReader = new USBReader;
+
+    usbReader->moveToThread(usbThread);
+
+    connect(usbThread, &QThread::started, usbReader, &USBReader::startReading);
+    connect(usbReader, &USBReader::usbData, this, &MainWindow::handleUSBData);
+    connect(usbReader, &USBReader::usbClosed, usbThread, &QThread::quit);
+    connect(usbThread, &QThread::finished, usbReader, &QObject::deleteLater);
+
+    usbThread->start();
+
+
+}
+
+void MainWindow::handleUSBData(quint32 data)
+{
+    logMessage(QString("USB Data Received: %1").arg(data));
+}
+
+
+void MainWindow::closeUSBData()
+{
+    static bool closing = false;
+    if(closing){return;}
+
+    closing = true;
+
+    logMessage("USB Data Emulation Closed");
+    usbReader->stopReading();
+
+    QTimer::singleShot(500, this, [this]() { closing = false; });
+}
+
+void MainWindow::pauseUSBData()
+{
+    USB_STATE usbState = usbReader->get_USBState();
+    switch(usbState){
+    case RUNNING:
+        logMessage("USB Data Emulation Paused");
+        break;
+    case PAUSED:
+        logMessage("USB Data Emulation Unpaused");
+        break;
+    default:
+        break;
+    }
+    usbReader->pauseReading();
+}
+
