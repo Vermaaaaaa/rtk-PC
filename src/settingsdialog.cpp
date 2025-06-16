@@ -1,6 +1,6 @@
 #include "settingsdialog.h"
-#include "renderersettingspage.h"
 #include "sessionsettingspage.h"
+#include "AnimationPage.h"
 #include "themesettingspage.h"
 #include "settingsmanager.h"
 #include "mainwindow.h"
@@ -15,15 +15,26 @@ SettingsDialog::SettingsDialog(SettingsManager *Settings, QWidget *parent) : QDi
     QPushButton *cancelButton = new QPushButton("Cancel",this);
 
     SessionSettingsPage *sessionSettingsPage = new SessionSettingsPage(this);
-    RendererSettingsPage *rendererSettingsPage = new RendererSettingsPage(settings, this);
+    AnimationPage *animationPage = new AnimationPage(this);
     ThemeSettingsPage *themeSettingsPage = new ThemeSettingsPage(settings, this);
 
     buttonLayout->addWidget(applyButton);
     buttonLayout->addWidget(cancelButton);
 
+    /*
     connect(applyButton, &QPushButton::clicked, this, [this, rendererSettingsPage, themeSettingsPage]() {
         applyChanges(rendererSettingsPage, themeSettingsPage);
     });
+*/
+
+    connect(sessionSettingsPage, &SessionSettingsPage::generatePlotsRequested,
+            this, &SettingsDialog::generatePlotsRequested);
+
+    connect(animationPage, &AnimationPage::requestAnimationFile, this, &SettingsDialog::requestAnimationFile);
+    connect(animationPage, &AnimationPage::generateAnimationRequested, this, &SettingsDialog::generateAnimationRequested);
+
+    connect(animationPage,&AnimationPage::generateAnimationRequested,this, &SettingsDialog::hide);
+
 
 
     buttonLayout->setAlignment(Qt::AlignBottom);
@@ -31,15 +42,15 @@ SettingsDialog::SettingsDialog(SettingsManager *Settings, QWidget *parent) : QDi
 
     listWidget = new QListWidget(this);
 
-    listWidget->addItem("Session");
-    listWidget->addItem("3D Renderer");
+    listWidget->addItem("Plot");
+    listWidget->addItem("Animation");
     listWidget->addItem("Themes");
 
 
 
     stackedWidget = new QStackedWidget(this);
     stackedWidget->addWidget(sessionSettingsPage);
-    stackedWidget->addWidget(rendererSettingsPage);
+    stackedWidget->addWidget(animationPage);
     stackedWidget->addWidget(themeSettingsPage);
 
 
@@ -62,13 +73,12 @@ void SettingsDialog::setCurrentRow(int row){
     listWidget->setCurrentRow(row);
 }
 
-void SettingsDialog::applyChanges(RendererSettingsPage *rendererSettingsPage, ThemeSettingsPage *themeSettingsPage){
+void SettingsDialog::applyChanges(ThemeSettingsPage *themeSettingsPage){
     themes_t theme = themeSettingsPage->get_selectedTheme();
     settings->guiSettings().setTheme(theme);
     static_cast<MainWindow*>(parent())->applyStyleSheet(theme);
 
-    bool isSepWin = rendererSettingsPage->getRendererCheckBox()->isChecked();
-    settings->rendererSettings().setIsSeparateWindow(isSepWin);
+
 
 
 }

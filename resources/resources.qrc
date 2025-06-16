@@ -1,0 +1,17 @@
+<RCC>
+    <qresource prefix="/">
+        <!-- Style Sheets -->
+        <file alias="MaterialDark.qss">styles/MaterialDark.qss</file>
+        <file alias="ManjaroMix.qss">styles/ManjaroMix.qss</file>
+        <file alias="Ubuntu.qss">styles/Ubuntu.qss</file>
+        <file alias="AMOLED.qss">styles/AMOLED.qss</file>
+        <file alias="Aqua.qss">styles/Aqua.qss</file>
+        <file alias="ConsoleStyle.qss">styles/ConsoleStyle.qss</file>
+        <file alias="ElegantDark.qss">styles/ElegantDark.qss</file>
+
+        <!-- Shaders -->
+        <file alias="shader.vert">shaders/shader.vert</file>
+        <file alias="shader.frag">shaders/shader.frag</file>
+        <file alias="shader.geom">shaders/shader.geom</file>
+    </qresource>
+</RCC>
